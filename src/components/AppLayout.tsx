@@ -1,22 +1,17 @@
-import { useState } from 'react';
-import type { ReactNode } from 'react';
+import { NavLink as RouterNavLink, Outlet, useLocation } from 'react-router-dom';
 import { AppShell, Burger, Group, NavLink, Title } from '@mantine/core';
 import { useDisclosure } from '@mantine/hooks';
 
 const navItems = [
-  { key: 'uploads', label: 'Загрузки' },
-  { key: 'new-upload', label: 'Новая загрузка' },
-  { key: 'defects', label: 'Дефекты' },
-  { key: 'tasks', label: 'Задания' },
+  { to: '/uploads', label: 'Загрузки' },
+  { to: '/uploads/new', label: 'Новая загрузка' },
+  { to: '/defects', label: 'Дефекты' },
+  { to: '/tasks', label: 'Задания' },
 ];
 
-type AppLayoutProps = {
-  children: ReactNode;
-};
-
-function AppLayout({ children }: AppLayoutProps) {
-  const [menuOpened, { toggle: toggleMenu }] = useDisclosure(false);
-  const [activeItem, setActiveItem] = useState('uploads');
+function AppLayout() {
+  const [menuOpened, { toggle: toggleMenu, close: closeMenu }] = useDisclosure(false);
+  const { pathname } = useLocation();
 
   return (
     <AppShell
@@ -34,15 +29,19 @@ function AppLayout({ children }: AppLayoutProps) {
       <AppShell.Navbar p="xs">
         {navItems.map((item) => (
           <NavLink
-            key={item.key}
+            key={item.to}
+            component={RouterNavLink}
+            to={item.to}
             label={item.label}
-            active={item.key === activeItem}
-            onClick={() => setActiveItem(item.key)}
+            active={pathname === item.to}
+            onClick={closeMenu}
           />
         ))}
       </AppShell.Navbar>
 
-      <AppShell.Main>{children}</AppShell.Main>
+      <AppShell.Main>
+        <Outlet />
+      </AppShell.Main>
     </AppShell>
   );
 }
