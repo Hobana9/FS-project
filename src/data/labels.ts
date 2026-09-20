@@ -1,6 +1,6 @@
 import type { DefectSeverity, DefectType, TaskStatus, UploadStatus } from '../types.ts';
 
-type Meta = {
+export type Meta = {
   label: string;
   color: string;
 };
