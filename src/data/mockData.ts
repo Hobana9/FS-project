@@ -98,6 +98,10 @@ export function findUpload(uploadId: string): Upload | undefined {
   return uploads.find((upload) => upload.id === uploadId);
 }
 
+export function findDefect(defectId: string): Defect | undefined {
+  return defects.find((defect) => defect.id === defectId);
+}
+
 export function findTaskByDefect(defectId: string): RepairTask | undefined {
   return repairTasks.find((task) => task.defectId === defectId);
 }
