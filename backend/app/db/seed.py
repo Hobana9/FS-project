@@ -4,12 +4,27 @@
 Повторный запуск ничего не делает, если данные уже есть.
 """
 
+import shutil
 from datetime import date
+from pathlib import Path
 
 from sqlalchemy import select
 
+from app.core.config import settings
 from app.db.session import SessionLocal
 from app.models import Defect, DefectSeverity, DefectType, RepairTask, TaskStatus, Upload, UploadStatus
+
+
+SAMPLE_PHOTOS_DIR = Path(__file__).parent / 'sample_photos'
+
+
+def copy_sample_photo(name: str) -> str:
+    """Кладёт демонстрационный снимок в media и возвращает его URL."""
+    settings.media_root.mkdir(parents=True, exist_ok=True)
+    target = settings.media_root / f'sample-{name}'
+    if not target.exists():
+        shutil.copyfile(SAMPLE_PHOTOS_DIR / name, target)
+    return f'/media/{target.name}'
 
 
 def seed() -> None:
@@ -23,7 +38,7 @@ def seed() -> None:
             section='д. 42 — д. 56',
             captured_at=date(2026, 9, 14),
             uploaded_by='Соколов А. В.',
-            photo_url='/photos/section-1.jpg',
+            photo_url=copy_sample_photo('section-1.jpg'),
             status=UploadStatus.processed,
             defects=[
                 Defect(
@@ -58,7 +73,7 @@ def seed() -> None:
             section='перекрёсток с ул. Мира',
             captured_at=date(2026, 9, 16),
             uploaded_by='Терехова М. И.',
-            photo_url='/photos/section-2.jpg',
+            photo_url=copy_sample_photo('section-2.jpg'),
             status=UploadStatus.processed,
             defects=[
                 Defect(
@@ -86,7 +101,7 @@ def seed() -> None:
             section='3-й км',
             captured_at=date(2026, 9, 18),
             uploaded_by='Соколов А. В.',
-            photo_url='/photos/section-3.jpg',
+            photo_url=copy_sample_photo('section-3.jpg'),
             status=UploadStatus.processing,
         )
 

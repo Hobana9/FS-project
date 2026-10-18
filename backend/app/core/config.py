@@ -1,7 +1,10 @@
+from pathlib import Path
+
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 
 class Settings(BaseSettings):
+    """Настройки приложения. Значения читаются из переменных окружения или из файла .env."""
 
     model_config = SettingsConfigDict(env_file='.env', env_file_encoding='utf-8', extra='ignore')
 
@@ -12,6 +15,18 @@ class Settings(BaseSettings):
     postgres_password: str = 'road_marking'
 
     cors_origins: str = 'http://localhost:5173'
+
+    media_dir: str = 'media'
+    max_upload_mb: int = 5
+
+    @property
+    def media_root(self) -> Path:
+        """Каталог, куда складываются загруженные фотографии."""
+        return Path(self.media_dir).resolve()
+
+    @property
+    def max_upload_bytes(self) -> int:
+        return self.max_upload_mb * 1024 * 1024
 
     @property
     def database_url(self) -> str:

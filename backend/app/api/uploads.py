@@ -1,4 +1,7 @@
-from fastapi import APIRouter, Depends, Query, Response, status
+from datetime import date
+from typing import Annotated
+
+from fastapi import APIRouter, Depends, File, Form, Query, Response, UploadFile, status
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_upload_or_404
@@ -7,6 +10,7 @@ from app.db.session import get_db
 from app.models import Upload
 from app.models.enums import UploadStatus
 from app.schemas.upload import UploadCreate, UploadRead, UploadUpdate
+from app.services import storage
 
 router = APIRouter(prefix='/api/uploads', tags=['Загрузки'])
 
@@ -25,9 +29,31 @@ def list_uploads(
     '',
     response_model=UploadRead,
     status_code=status.HTTP_201_CREATED,
-    summary='Загрузить снимок',
+    summary='Загрузить снимок участка',
 )
-def create_upload(data: UploadCreate, db: Session = Depends(get_db)) -> Upload:
+def create_upload(
+    street: Annotated[str, Form(description='Улица')],
+    section: Annotated[str, Form(description='Участок или ориентир')],
+    captured_at: Annotated[date, Form(description='Дата съёмки')],
+    uploaded_by: Annotated[str, Form(description='Кто загрузил снимок')],
+    photo: Annotated[UploadFile, File(description='Фотография участка, JPEG или PNG')],
+    db: Session = Depends(get_db),
+) -> Upload:
+    photo_url = storage.save_photo(photo)
+    try:
+        data = UploadCreate(
+            street=street,
+            section=section,
+            captured_at=captured_at,
+            uploaded_by=uploaded_by,
+            photo_url=photo_url,
+        )
+    except Exception:
+        # Данные не прошли проверку — удаляем уже сохранённый файл,
+        # чтобы он не остался в media без записи в базе.
+        storage.delete_photo(photo_url)
+        raise
+
     return upload_crud.create_upload(db, data)
 
 
@@ -54,5 +80,7 @@ def delete_upload(
     upload: Upload = Depends(get_upload_or_404),
     db: Session = Depends(get_db),
 ) -> Response:
+    photo_url = upload.photo_url
     upload_crud.delete_upload(db, upload)
+    storage.delete_photo(photo_url)
     return Response(status_code=status.HTTP_204_NO_CONTENT)

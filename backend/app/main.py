@@ -1,6 +1,9 @@
 from fastapi import FastAPI, Request, status
+from fastapi.encoders import jsonable_encoder
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
+from pydantic import ValidationError
 from sqlalchemy.exc import IntegrityError
 
 from app.api import defects, repair_tasks, uploads
@@ -23,6 +26,20 @@ app.add_middleware(
 app.include_router(uploads.router)
 app.include_router(defects.router)
 app.include_router(repair_tasks.router)
+
+# Раздача загруженных фотографий. Каталог создаётся заранее:
+# StaticFiles требует существующий путь уже при подключении.
+settings.media_root.mkdir(parents=True, exist_ok=True)
+app.mount('/media', StaticFiles(directory=settings.media_root), name='media')
+
+
+@app.exception_handler(ValidationError)
+def validation_error_handler(request: Request, exc: ValidationError) -> JSONResponse:
+    """Ошибки схем, которые мы проверяем вручную, отдаём в том же виде, что и остальные."""
+    return JSONResponse(
+        status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
+        content={'detail': jsonable_encoder(exc.errors())},
+    )
 
 
 @app.exception_handler(IntegrityError)
