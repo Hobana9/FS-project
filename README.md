@@ -61,6 +61,8 @@ frontend/             клиентская часть (React + TypeScript)
 backend/              серверная часть (FastAPI)
   app/
     core/config.py    конфигурация приложения
+    db/               подключение к БД, сессии, создание таблиц, демо-данные
+    models/           модели SQLAlchemy (таблицы и связи)
     main.py           создание приложения и подключение маршрутов
   requirements.txt    зависимости Python
   .env.example        пример настроек окружения
@@ -74,15 +76,26 @@ docs/screenshots/     скриншоты экранов
 
 ## Модель данных
 
-Три сущности, связанные по идентификаторам:
+Три таблицы, связанные внешними ключами:
 
-- `Upload` — загруженный снимок участка;
-- `Defect` — дефект разметки, найденный на снимке (`uploadId` ссылается на `Upload`);
-- `RepairTask` — задание на ремонт по конкретному дефекту (`defectId` ссылается на `Defect`).
+```
+uploads 1 ──< N defects 1 ──1 repair_tasks
+```
 
-Адрес хранится только у снимка, дефект и задание получают его по цепочке ссылок.
-На этом этапе данные лежат в `src/data/mockData.ts`, в лабораторной работе №2 их
-заменят таблицы PostgreSQL с теми же связями.
+| Таблица | Поля | Связи и ограничения |
+| --- | --- | --- |
+| `uploads` | `id`, `street`, `section`, `captured_at`, `uploaded_by`, `photo_url`, `status`, `created_at` | `status` — перечисление `upload_status` |
+| `defects` | `id`, `upload_id`, `type`, `severity`, `wear_percent`, `length_m` | `upload_id` → `uploads.id` (ON DELETE CASCADE), индекс; `wear_percent` в диапазоне 0–100, `length_m` больше нуля |
+| `repair_tasks` | `id`, `defect_id`, `crew`, `due_date`, `status`, `comment`, `created_at` | `defect_id` → `defects.id` (ON DELETE CASCADE), уникальный — не более одного задания на дефект |
+
+Перечисления (`upload_status`, `defect_type`, `defect_severity`, `task_status`) создаются
+как собственные типы PostgreSQL, поэтому значение вне списка в таблицу не попадёт.
+
+Адрес хранится только у снимка: дефект и задание получают его по цепочке связей.
+Количество дефектов у снимка не хранится отдельно, а считается по связанным записям.
+
+Интерфейс пока использует демонстрационные данные из `frontend/src/data/mockData.ts`;
+подключение экранов к API выполняется в лабораторной работе №5.
 
 ## Запуск frontend
 
@@ -105,7 +118,7 @@ npm run preview   # посмотреть собранную версию
 
 ## Запуск backend
 
-Нужны Python 3.11 или новее и Docker (для базы данных).
+Нужны Python 3.11–3.13 (проверено на 3.13) и Docker для базы данных.
 
 Настройки окружения:
 
@@ -129,6 +142,18 @@ cd backend
 python -m venv .venv
 source .venv/bin/activate        # Windows: .venv\Scripts\activate
 pip install -r requirements.txt
+```
+
+Создание таблиц и демонстрационные данные:
+
+```bash
+python -m app.db.init_db     # создаёт таблицы и типы-перечисления
+python -m app.db.seed        # заполняет базу демо-данными, повторный запуск безопасен
+```
+
+Запуск сервера:
+
+```bash
 uvicorn app.main:app --reload
 ```
 
