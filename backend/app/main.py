@@ -1,6 +1,7 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
+from app.api import uploads
 from app.core.config import settings
 
 app = FastAPI(
@@ -16,6 +17,9 @@ app.add_middleware(
     allow_methods=['*'],
     allow_headers=['*'],
 )
+
+
+app.include_router(uploads.router)
 
 
 @app.get('/api/health', tags=['Служебные'], summary='Проверка работоспособности')
