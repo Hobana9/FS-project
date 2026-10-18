@@ -19,6 +19,9 @@ class Settings(BaseSettings):
     media_dir: str = 'media'
     max_upload_mb: int = 5
 
+    # Какой анализатор снимков использовать
+    analyzer: str = 'stub'
+
     @property
     def media_root(self) -> Path:
         """Каталог, куда складываются загруженные фотографии."""

@@ -1,7 +1,17 @@
 from datetime import date
 from typing import Annotated
 
-from fastapi import APIRouter, Depends, File, Form, Query, Response, UploadFile, status
+from fastapi import (
+    APIRouter,
+    BackgroundTasks,
+    Depends,
+    File,
+    Form,
+    Query,
+    Response,
+    UploadFile,
+    status,
+)
 from sqlalchemy.orm import Session
 
 from app.api.deps import get_upload_or_404
@@ -11,6 +21,7 @@ from app.models import Upload
 from app.models.enums import UploadStatus
 from app.schemas.upload import UploadCreate, UploadRead, UploadUpdate
 from app.services import storage
+from app.services.analysis import analyze_upload
 
 router = APIRouter(prefix='/api/uploads', tags=['Загрузки'])
 
@@ -37,6 +48,7 @@ def create_upload(
     captured_at: Annotated[date, Form(description='Дата съёмки')],
     uploaded_by: Annotated[str, Form(description='Кто загрузил снимок')],
     photo: Annotated[UploadFile, File(description='Фотография участка, JPEG или PNG')],
+    background_tasks: BackgroundTasks,
     db: Session = Depends(get_db),
 ) -> Upload:
     photo_url = storage.save_photo(photo)
@@ -54,7 +66,25 @@ def create_upload(
         storage.delete_photo(photo_url)
         raise
 
-    return upload_crud.create_upload(db, data)
+    upload = upload_crud.create_upload(db, data)
+    # Анализ запускается после отправки ответа: клиент получает снимок
+    # со статусом processing и не ждёт завершения обработки.
+    background_tasks.add_task(analyze_upload, upload.id)
+    return upload
+
+
+@router.post(
+    '/{upload_id}/analyze',
+    status_code=status.HTTP_202_ACCEPTED,
+    summary='Запустить повторный анализ снимка',
+    description='Прежние найденные дефекты и связанные с ними задания будут заменены.',
+)
+def reanalyze_upload(
+    background_tasks: BackgroundTasks,
+    upload: Upload = Depends(get_upload_or_404),
+) -> dict[str, str]:
+    background_tasks.add_task(analyze_upload, upload.id)
+    return {'detail': f'Снимок {upload.id} поставлен в очередь на обработку'}
 
 
 @router.get('/{upload_id}', response_model=UploadRead, summary='Снимок по идентификатору')
