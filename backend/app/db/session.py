@@ -15,5 +15,10 @@ def get_db() -> Generator[Session, None, None]:
     db = SessionLocal()
     try:
         yield db
+    except Exception:
+        # Откатываем незавершённую транзакцию, иначе соединение вернётся
+        # в пул в сломанном состоянии и следующий запрос получит ошибку.
+        db.rollback()
+        raise
     finally:
         db.close()

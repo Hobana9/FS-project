@@ -35,3 +35,16 @@ class Defect(Base):
         back_populates='defect',
         cascade='all, delete-orphan',
     )
+
+    @property
+    def address(self) -> str:
+        """Адрес берётся у снимка, на котором найден дефект."""
+        return f'{self.upload.street}, {self.upload.section}'
+
+    @property
+    def task_id(self) -> int | None:
+        return self.task.id if self.task is not None else None
+
+    @property
+    def task_crew(self) -> str | None:
+        return self.task.crew if self.task is not None else None

@@ -1,9 +1,11 @@
 from fastapi import Depends, HTTPException, Path, status
 from sqlalchemy.orm import Session
 
+from app.crud import defect as defect_crud
+from app.crud import repair_task as task_crud
 from app.crud import upload as upload_crud
 from app.db.session import get_db
-from app.models import Upload
+from app.models import Defect, RepairTask, Upload
 
 
 def get_upload_or_404(
@@ -17,3 +19,29 @@ def get_upload_or_404(
             detail=f'Снимок с id={upload_id} не найден',
         )
     return upload
+
+
+def get_defect_or_404(
+    defect_id: int = Path(ge=1, description='Идентификатор дефекта'),
+    db: Session = Depends(get_db),
+) -> Defect:
+    defect = defect_crud.get_defect(db, defect_id)
+    if defect is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f'Дефект с id={defect_id} не найден',
+        )
+    return defect
+
+
+def get_task_or_404(
+    task_id: int = Path(ge=1, description='Идентификатор задания'),
+    db: Session = Depends(get_db),
+) -> RepairTask:
+    task = task_crud.get_task(db, task_id)
+    if task is None:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f'Задание с id={task_id} не найдено',
+        )
+    return task
