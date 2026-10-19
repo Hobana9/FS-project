@@ -7,9 +7,11 @@ from app.services.analyzer.base import (
     MarkingAnalyzer,
     severity_from_wear,
 )
+from app.services.analyzer.opencv import OpenCvAnalyzer
 from app.services.analyzer.stub import StubAnalyzer
 
 _ANALYZERS: dict[str, type] = {
+    OpenCvAnalyzer.name: OpenCvAnalyzer,
     StubAnalyzer.name: StubAnalyzer,
 }
 

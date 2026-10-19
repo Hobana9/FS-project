@@ -20,7 +20,10 @@ class Settings(BaseSettings):
     max_upload_mb: int = 5
 
     # Какой анализатор снимков использовать
-    analyzer: str = 'stub'
+    analyzer: str = 'opencv'
+
+    # Калибровка масштаба съёмки: сколько пикселей снимка приходится на метр дороги
+    pixels_per_meter: float = 40.0
 
     @property
     def media_root(self) -> Path:

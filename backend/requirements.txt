@@ -4,3 +4,5 @@ sqlalchemy==2.1.4
 psycopg[binary]==3.3.6
 pydantic-settings==2.14.0
 python-multipart==0.0.26
+opencv-python-headless==4.13.0.92
+numpy==2.4.4
