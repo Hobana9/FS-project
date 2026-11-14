@@ -1,8 +1,8 @@
 import { Card, Group, SimpleGrid, Stack, Text, Title } from '@mantine/core';
-import MetaBadge from '../components/MetaBadge.tsx';
-import { defectSeverityMeta, defectTypeMeta, taskStatusMeta } from '../data/labels.ts';
-import { findDefect, getDefectAddress, repairTasks } from '../data/mockData.ts';
-import { formatDate } from '../utils/format.ts';
+import { MetaBadge } from '../shared/ui/index.ts';
+import { formatDate } from '../shared/lib/index.ts';
+import { defectSeverityMeta, defectTypeMeta, findDefect, getDefectAddress } from '../entities/defect/index.ts';
+import { repairTasks, taskStatusMeta } from '../entities/repair-task/index.ts';
 
 function TasksPage() {
   const cards = repairTasks.map((task) => {

@@ -1,9 +1,8 @@
 import { Button, Group, Image, Stack, Table, Text, Title } from '@mantine/core';
 import { Link } from 'react-router-dom';
-import MetaBadge from '../components/MetaBadge.tsx';
-import { uploadStatusMeta } from '../data/labels.ts';
-import { uploads } from '../data/mockData.ts';
-import { formatDate } from '../utils/format.ts';
+import { MetaBadge } from '../shared/ui/index.ts';
+import { formatDate } from '../shared/lib/index.ts';
+import { uploads, uploadStatusMeta } from '../entities/upload/index.ts';
 
 function UploadsPage() {
   const rows = uploads.map((upload) => (

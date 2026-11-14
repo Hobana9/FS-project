@@ -1,9 +1,9 @@
 import { useState } from 'react';
 import { Card, Group, Select, Stack, Table, Text, Title } from '@mantine/core';
-import MetaBadge from '../components/MetaBadge.tsx';
-import { defectSeverityMeta, defectTypeMeta } from '../data/labels.ts';
-import { defects, findTaskByDefect, getDefectAddress } from '../data/mockData.ts';
-import type { DefectSeverity, DefectType } from '../types.ts';
+import { MetaBadge } from '../shared/ui/index.ts';
+import { defects, defectSeverityMeta, defectTypeMeta, getDefectAddress } from '../entities/defect/index.ts';
+import type { DefectSeverity, DefectType } from '../entities/defect/index.ts';
+import { findTaskByDefect } from '../entities/repair-task/index.ts';
 
 type TypeFilter = DefectType | 'all';
 type SeverityFilter = DefectSeverity | 'all';
