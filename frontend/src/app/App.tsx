@@ -1,10 +1,10 @@
 import { Navigate, Route, Routes } from 'react-router-dom';
-import AppLayout from './components/AppLayout.tsx';
-import UploadsPage from './pages/UploadsPage.tsx';
-import NewUploadPage from './pages/NewUploadPage.tsx';
-import DefectsPage from './pages/DefectsPage.tsx';
-import TasksPage from './pages/TasksPage.tsx';
-import NotFoundPage from './pages/NotFoundPage.tsx';
+import AppLayout from './AppLayout.tsx';
+import UploadsPage from '../pages/UploadsPage.tsx';
+import NewUploadPage from '../pages/NewUploadPage.tsx';
+import DefectsPage from '../pages/DefectsPage.tsx';
+import TasksPage from '../pages/TasksPage.tsx';
+import NotFoundPage from '../pages/NotFoundPage.tsx';
 
 function App() {
   return (
