@@ -1,6 +1,8 @@
 import type { Meta } from '../../shared/lib/index.ts';
 
-export type TaskStatus = 'new' | 'in_progress' | 'done';
+const taskStatuses = ['new', 'in_progress', 'done'] as const;
+
+export type TaskStatus = (typeof taskStatuses)[number];
 
 /** Задание на восстановление разметки по конкретному дефекту */
 export type RepairTask = {
@@ -17,3 +19,8 @@ export const taskStatusMeta: Record<TaskStatus, Meta> = {
   in_progress: { label: 'Выполняется', color: 'indigo' },
   done: { label: 'Выполнено', color: 'teal' },
 };
+
+export const taskStatusOptions = taskStatuses.map((status) => ({
+  value: status,
+  label: taskStatusMeta[status].label,
+}));
