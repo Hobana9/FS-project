@@ -2,7 +2,6 @@ import { useState } from 'react';
 import {
   Alert,
   Button,
-  Card,
   Group,
   Modal,
   Select,
@@ -13,7 +12,8 @@ import {
 } from '@mantine/core';
 import { Link } from 'react-router-dom';
 import { CreateRepairTaskForm } from '../features/create-repair-task/index.ts';
-import { MetaBadge } from '../shared/ui/index.ts';
+import { DataState, MetaBadge } from '../shared/ui/index.ts';
+import { useDemoList } from '../shared/lib/index.ts';
 import {
   defects,
   defectSeverityMeta,
@@ -30,6 +30,7 @@ type SeverityFilter = DefectSeverity | 'all';
 function DefectsPage() {
   const { uploads } = useUploads();
   const { repairTasks } = useRepairTasks();
+  const { data, status, retry } = useDemoList(defects);
   const [typeFilter, setTypeFilter] = useState<TypeFilter>('all');
   const [severityFilter, setSeverityFilter] = useState<SeverityFilter>('all');
   const [selectedDefect, setSelectedDefect] = useState<Defect | null>(null);
@@ -37,7 +38,7 @@ function DefectsPage() {
 
   const filtersActive = typeFilter !== 'all' || severityFilter !== 'all';
 
-  const visibleDefects = defects.filter((defect) => {
+  const visibleDefects = data.filter((defect) => {
     const typeMatches = typeFilter === 'all' || defect.type === typeFilter;
     const severityMatches = severityFilter === 'all' || defect.severity === severityFilter;
     return typeMatches && severityMatches;
@@ -127,22 +128,26 @@ function DefectsPage() {
         )}
 
         <Group align="flex-end" gap="sm">
-          <Select
+          <Select<TypeFilter>
             label="Тип дефекта"
             w={220}
             value={typeFilter}
-            onChange={(value) => setTypeFilter((value ?? 'all') as TypeFilter)}
+            onChange={(value) => setTypeFilter(value ?? 'all')}
+            allowDeselect={false}
+            disabled={status !== 'ready'}
             data={[
               { value: 'all', label: 'Все типы' },
               { value: 'faded_line', label: defectTypeMeta.faded_line.label },
               { value: 'gap', label: defectTypeMeta.gap.label },
             ]}
           />
-          <Select
+          <Select<SeverityFilter>
             label="Серьёзность"
             w={180}
             value={severityFilter}
-            onChange={(value) => setSeverityFilter((value ?? 'all') as SeverityFilter)}
+            onChange={(value) => setSeverityFilter(value ?? 'all')}
+            allowDeselect={false}
+            disabled={status !== 'ready'}
             data={[
               { value: 'all', label: 'Любая' },
               { value: 'high', label: defectSeverityMeta.high.label },
@@ -152,30 +157,39 @@ function DefectsPage() {
           />
           <Button
             variant="default"
-            disabled={!filtersActive}
+            disabled={status !== 'ready' || !filtersActive}
             onClick={resetFilters}
           >
             Сбросить фильтры
           </Button>
-          <Text size="sm" c="dimmed" pb={8}>
-            Найдено: {visibleDefects.length}
-          </Text>
+          {status === 'ready' && (
+            <Text size="sm" c="dimmed" pb={8}>
+              Найдено: {visibleDefects.length}
+            </Text>
+          )}
         </Group>
 
-        {visibleDefects.length === 0 ? (
-          <Card withBorder padding="lg">
-            <Stack gap="sm" align="flex-start">
-              <Text c="dimmed">
-                Под выбранные условия не подходит ни один дефект.
-              </Text>
-              {filtersActive && (
-                <Button variant="light" onClick={resetFilters}>
-                  Сбросить фильтры
-                </Button>
-              )}
-            </Stack>
-          </Card>
-        ) : (
+        <DataState
+          status={status}
+          isEmpty={visibleDefects.length === 0}
+          emptyMessage={
+            data.length === 0
+              ? 'Дефектов пока нет. Они появятся после анализа снимков.'
+              : 'Под выбранные условия не подходит ни один дефект.'
+          }
+          emptyAction={
+            data.length === 0 ? (
+              <Button component={Link} to="/uploads" variant="light">
+                Перейти к снимкам
+              </Button>
+            ) : (
+              <Button variant="light" onClick={resetFilters}>
+                Сбросить фильтры
+              </Button>
+            )
+          }
+          onRetry={retry}
+        >
           <Table.ScrollContainer minWidth={760}>
             <Table verticalSpacing="sm" highlightOnHover>
               <Table.Thead>
@@ -191,7 +205,7 @@ function DefectsPage() {
               <Table.Tbody>{rows}</Table.Tbody>
             </Table>
           </Table.ScrollContainer>
-        )}
+        </DataState>
       </Stack>
 
       <Modal
@@ -199,6 +213,7 @@ function DefectsPage() {
         onClose={closeCreateTask}
         title="Новое задание на ремонт"
         closeButtonProps={{ 'aria-label': 'Закрыть форму задания' }}
+        transitionProps={{ transition: 'fade', duration: 160, exitDuration: 0 }}
         centered
       >
         {selectedDefect && (

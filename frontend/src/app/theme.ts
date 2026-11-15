@@ -5,4 +5,5 @@ export const theme = createTheme({
   defaultRadius: 'md',
   fontFamily: 'system-ui, "Segoe UI", Roboto, sans-serif',
   headings: { fontWeight: '600' },
+  respectReducedMotion: true,
 });

@@ -1,13 +1,14 @@
 import { Button, Group, Image, Stack, Table, Text, Title } from '@mantine/core';
 import { Link } from 'react-router-dom';
-import { MetaBadge } from '../shared/ui/index.ts';
-import { formatDate } from '../shared/lib/index.ts';
+import { DataState, MetaBadge } from '../shared/ui/index.ts';
+import { formatDate, useDemoList } from '../shared/lib/index.ts';
 import { uploadStatusMeta, useUploads } from '../entities/upload/index.ts';
 
 function UploadsPage() {
   const { uploads } = useUploads();
+  const { data, status, retry } = useDemoList(uploads);
 
-  const rows = uploads.map((upload) => (
+  const rows = data.map((upload) => (
     <Table.Tr key={upload.id}>
       <Table.Td>
         <Image src={upload.photoUrl} alt="" w={96} h={60} fit="cover" radius="sm" />
@@ -36,21 +37,28 @@ function UploadsPage() {
         </Button>
       </Group>
 
-      <Table.ScrollContainer minWidth={760}>
-        <Table verticalSpacing="sm" highlightOnHover>
-          <Table.Thead>
-            <Table.Tr>
-              <Table.Th>Снимок</Table.Th>
-              <Table.Th>Участок</Table.Th>
-              <Table.Th>Дата съёмки</Table.Th>
-              <Table.Th>Инспектор</Table.Th>
-              <Table.Th>Статус</Table.Th>
-              <Table.Th>Дефектов</Table.Th>
-            </Table.Tr>
-          </Table.Thead>
-          <Table.Tbody>{rows}</Table.Tbody>
-        </Table>
-      </Table.ScrollContainer>
+      <DataState
+        status={status}
+        isEmpty={data.length === 0}
+        emptyMessage="Снимков пока нет. Добавьте фотографию участка."
+        onRetry={retry}
+      >
+        <Table.ScrollContainer minWidth={760}>
+          <Table verticalSpacing="sm" highlightOnHover>
+            <Table.Thead>
+              <Table.Tr>
+                <Table.Th>Снимок</Table.Th>
+                <Table.Th>Участок</Table.Th>
+                <Table.Th>Дата съёмки</Table.Th>
+                <Table.Th>Инспектор</Table.Th>
+                <Table.Th>Статус</Table.Th>
+                <Table.Th>Дефектов</Table.Th>
+              </Table.Tr>
+            </Table.Thead>
+            <Table.Tbody>{rows}</Table.Tbody>
+          </Table>
+        </Table.ScrollContainer>
+      </DataState>
     </Stack>
   );
 }
