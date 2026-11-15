@@ -1,5 +1,5 @@
 import { Badge } from '@mantine/core';
-import type { Meta } from '../data/labels.ts';
+import type { Meta } from '../lib/index.ts';
 
 type MetaBadgeProps = {
   meta: Meta;
