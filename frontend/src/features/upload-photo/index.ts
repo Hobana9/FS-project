@@ -1,0 +1,1 @@
+export { default as UploadPhotoForm } from './UploadPhotoForm.tsx';
