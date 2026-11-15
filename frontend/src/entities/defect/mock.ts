@@ -1,4 +1,4 @@
-import { findUpload } from '../upload/index.ts';
+import type { Upload } from '../upload/index.ts';
 import type { Defect } from './model.ts';
 
 export const defects: Defect[] = [
@@ -12,9 +12,12 @@ export function findDefect(defectId: string): Defect | undefined {
   return defects.find((defect) => defect.id === defectId);
 }
 
-/** Адрес дефекта берётся у снимка, на котором он найден */
-export function getDefectAddress(defect: Defect): string {
-  const upload = findUpload(defect.uploadId);
+/** Адрес дефекта берётся из актуального списка снимков. */
+export function getDefectAddress(
+  defect: Defect,
+  uploads: readonly Upload[],
+): string {
+  const upload = uploads.find((item) => item.id === defect.uploadId);
 
   if (!upload) {
     return 'Адрес не определён';

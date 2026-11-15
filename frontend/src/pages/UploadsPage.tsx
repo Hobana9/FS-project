@@ -2,9 +2,11 @@ import { Button, Group, Image, Stack, Table, Text, Title } from '@mantine/core';
 import { Link } from 'react-router-dom';
 import { MetaBadge } from '../shared/ui/index.ts';
 import { formatDate } from '../shared/lib/index.ts';
-import { uploads, uploadStatusMeta } from '../entities/upload/index.ts';
+import { uploadStatusMeta, useUploads } from '../entities/upload/index.ts';
 
 function UploadsPage() {
+  const { uploads } = useUploads();
+
   const rows = uploads.map((upload) => (
     <Table.Tr key={upload.id}>
       <Table.Td>

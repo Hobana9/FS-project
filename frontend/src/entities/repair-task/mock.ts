@@ -1,6 +1,6 @@
 import type { RepairTask } from './model.ts';
 
-export const repairTasks: RepairTask[] = [
+export const initialRepairTasks: RepairTask[] = [
   {
     id: 't-301',
     defectId: 'd-201',
@@ -25,7 +25,3 @@ export const repairTasks: RepairTask[] = [
     comment: 'Работы приняты инспектором',
   },
 ];
-
-export function findTaskByDefect(defectId: string): RepairTask | undefined {
-  return repairTasks.find((task) => task.defectId === defectId);
-}

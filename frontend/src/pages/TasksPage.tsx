@@ -2,9 +2,13 @@ import { Card, Group, SimpleGrid, Stack, Text, Title } from '@mantine/core';
 import { MetaBadge } from '../shared/ui/index.ts';
 import { formatDate } from '../shared/lib/index.ts';
 import { defectSeverityMeta, defectTypeMeta, findDefect, getDefectAddress } from '../entities/defect/index.ts';
-import { repairTasks, taskStatusMeta } from '../entities/repair-task/index.ts';
+import { taskStatusMeta, useRepairTasks } from '../entities/repair-task/index.ts';
+import { useUploads } from '../entities/upload/index.ts';
 
 function TasksPage() {
+  const { uploads } = useUploads();
+  const { repairTasks } = useRepairTasks();
+
   const cards = repairTasks.map((task) => {
     const defect = findDefect(task.defectId);
 
@@ -18,7 +22,7 @@ function TasksPage() {
 
           {defect ? (
             <>
-              <Text size="sm">{getDefectAddress(defect)}</Text>
+              <Text size="sm">{getDefectAddress(defect, uploads)}</Text>
               <Group gap="xs">
                 <MetaBadge meta={defectTypeMeta[defect.type]} />
                 <MetaBadge meta={defectSeverityMeta[defect.severity]} />

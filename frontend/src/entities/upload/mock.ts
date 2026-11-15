@@ -1,6 +1,6 @@
 import type { Upload } from './model.ts';
 
-export const uploads: Upload[] = [
+export const initialUploads: Upload[] = [
   {
     id: 'u-101',
     street: 'проспект Ленина',
@@ -32,7 +32,3 @@ export const uploads: Upload[] = [
     defectCount: 0,
   },
 ];
-
-export function findUpload(uploadId: string): Upload | undefined {
-  return uploads.find((upload) => upload.id === uploadId);
-}

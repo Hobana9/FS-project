@@ -3,12 +3,15 @@ import { Card, Group, Select, Stack, Table, Text, Title } from '@mantine/core';
 import { MetaBadge } from '../shared/ui/index.ts';
 import { defects, defectSeverityMeta, defectTypeMeta, getDefectAddress } from '../entities/defect/index.ts';
 import type { DefectSeverity, DefectType } from '../entities/defect/index.ts';
-import { findTaskByDefect } from '../entities/repair-task/index.ts';
+import { useRepairTasks } from '../entities/repair-task/index.ts';
+import { useUploads } from '../entities/upload/index.ts';
 
 type TypeFilter = DefectType | 'all';
 type SeverityFilter = DefectSeverity | 'all';
 
 function DefectsPage() {
+  const { uploads } = useUploads();
+  const { repairTasks } = useRepairTasks();
   const [typeFilter, setTypeFilter] = useState<TypeFilter>('all');
   const [severityFilter, setSeverityFilter] = useState<SeverityFilter>('all');
 
@@ -19,11 +22,11 @@ function DefectsPage() {
   });
 
   const rows = visibleDefects.map((defect) => {
-    const task = findTaskByDefect(defect.id);
+    const task = repairTasks.find((item) => item.defectId === defect.id);
 
     return (
       <Table.Tr key={defect.id}>
-        <Table.Td>{getDefectAddress(defect)}</Table.Td>
+        <Table.Td>{getDefectAddress(defect, uploads)}</Table.Td>
         <Table.Td>
           <MetaBadge meta={defectTypeMeta[defect.type]} />
         </Table.Td>
