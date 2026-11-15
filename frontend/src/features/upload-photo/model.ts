@@ -1,3 +1,5 @@
+import { isValidDate } from '../../shared/lib/index.ts';
+
 export const MAX_PHOTO_SIZE_MB = 5;
 
 const ALLOWED_PHOTO_TYPES = ['image/jpeg', 'image/png'];
@@ -64,16 +66,6 @@ function validateRequiredText(value: string, message: string): string | undefine
   }
 
   return undefined;
-}
-
-function isValidDate(value: string): boolean {
-  if (!/^\d{4}-\d{2}-\d{2}$/.test(value)) {
-    return false;
-  }
-
-  const date = new Date(`${value}T00:00:00`);
-
-  return !Number.isNaN(date.getTime()) && getLocalDate(date) === value;
 }
 
 export function validateUploadForm(values: UploadFormValues): UploadFormErrors {
